@@ -54,6 +54,14 @@ const run = async () => {
       res.send(result);
     });
 
+    // get  category products
+    app.get("/product/category/:category", async (req, res) => {
+      const category = req.params.category;
+      const query = { category: category };
+      const result = await productList.find(query).toArray();
+      res.send(result);
+    });
+
     // add a product on advertising
     app.put("/product/:id", async (req, res) => {
       const id = req.params;
