@@ -27,6 +27,15 @@ const run = async () => {
       const result = await productList.insertOne(product);
       res.send(result);
     });
+
+    // get product
+    app.get("/product", async (req, res) => {
+      const result = await productList
+        .find({})
+        .sort({ upload_time: -1 })
+        .toArray();
+      res.send(result);
+    });
   } finally {
   }
 };
