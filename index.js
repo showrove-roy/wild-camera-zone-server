@@ -47,14 +47,18 @@ const run = async () => {
       res.send(result);
     });
 
-    // add a product on advertising
+    // get only ad product
+    app.get("/product/ad", async (req, res) => {
+      const query = { ad_status: "ad" };
+      const result = await productList.find(query).toArray();
+      res.send(result);
+    });
 
+    // add a product on advertising
     app.put("/product/:id", async (req, res) => {
       const id = req.params;
-      console.log("🚀 ~ file: index.js ~ line 54 ~ app.put ~ id", id);
-      const ad = req.body;
+      const ad = req.body.ad_status;
       const filter = { _id: ObjectId(id) };
-      console.log("🚀 ~ file: index.js ~ line 57 ~ app.put ~ ad", ad);
       const options = { upsert: true };
       const updateDoc = {
         $set: {
