@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const { MongoClient, ServerApiVersion } = require("mongodb");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
@@ -9,7 +10,29 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
+const uri = `mongodb+srv://${process.env.DBUSER_NAME}:${process.env.SECRET_KEY}@cluster0.in3ib7y.mongodb.net/?retryWrites=true&w=majority`;
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverApi: ServerApiVersion.v1,
+});
+
+const run = async () => {
+  try {
+    const productList = client.db("wcz-BD").collection("productList");
+
+    // add a product
+    app.post("/product/add", async (req, res) => {
+      const product = req.body;
+      const result = await productList.insertOne(product);
+      res.send(result);
+    });
+  } finally {
+  }
+};
+run().catch(console.dir);
+
+app.get("", (req, res) => {
   res.send("Wild Camera Zone Server Is Running");
 });
 
