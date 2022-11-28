@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
+const { query } = require("express");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -20,6 +21,7 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     const productList = client.db("wcz-BD").collection("productList");
+    const userList = client.db("wcz-BD").collection("userList");
 
     // add a product
     app.post("/product/add", async (req, res) => {
@@ -51,6 +53,19 @@ const run = async () => {
     app.get("/product/ad", async (req, res) => {
       const query = { ad_status: "ad" };
       const result = await productList.find(query).toArray();
+      res.send(result);
+    });
+
+    // update user list
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const userEmail = user.email;
+      const query = { email: userEmail };
+      const storedUser = await userList.findOne(query);
+      if (storedUser?.email === userEmail) {
+        return res.send({ acknowledged: true });
+      }
+      const result = await userList.insertOne(user);
       res.send(result);
     });
 
