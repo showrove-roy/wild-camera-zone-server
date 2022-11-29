@@ -68,7 +68,7 @@ const run = async () => {
     });
 
     // get product
-    app.get("/product", verifyJWT, async (req, res) => {
+    app.get("/product", async (req, res) => {
       // get single seller products
       const email = req.query.email;
       const query = { seller_email: email };
