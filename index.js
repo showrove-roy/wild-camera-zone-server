@@ -56,6 +56,40 @@ const run = async () => {
       res.send(result);
     });
 
+    // get all users
+    app.get("/users", async (req, res) => {
+      const userType = req.query.role;
+      const query = { role: userType };
+      const result = await userList.find(query).toArray();
+      res.send(result);
+    });
+
+    //verify seller
+    app.put("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const filter2 = { seller_email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          seller_type: "verified",
+        },
+      };
+      const result = await userList.updateOne(filter, updateDoc, options);
+      if (result.modifiedCount > 0) {
+        const storedUser = await productList.find(filter2).toArray();
+        if (storedUser.length > 0) {
+          const result2 = await productList.updateMany(
+            filter2,
+            updateDoc,
+            options
+          );
+          return res.send(result2);
+        }
+      }
+      res.send(result);
+    });
+
     // update user list
     app.post("/users", async (req, res) => {
       const user = req.body;
