@@ -17,6 +17,22 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+// json web token verify
+const verifyJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ message: "forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 const run = async () => {
   try {
     const productList = client.db("wcz-BD").collection("productList");
@@ -29,7 +45,7 @@ const run = async () => {
       const user = await userList.findOne(query);
       if (user) {
         const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-          expiresIn: "1h",
+          expiresIn: "24h",
         });
         return res.send({ accessToken: token });
       }
@@ -52,7 +68,7 @@ const run = async () => {
     });
 
     // get product
-    app.get("/product", async (req, res) => {
+    app.get("/product", verifyJWT, async (req, res) => {
       // get single seller products
       const email = req.query.email;
       const query = { seller_email: email };
@@ -78,7 +94,7 @@ const run = async () => {
     });
 
     // get all users
-    app.get("/users", async (req, res) => {
+    app.get("/users", verifyJWT, async (req, res) => {
       const userType = req.query.role;
       const query = { role: userType };
       const result = await userList.find(query).toArray();
@@ -125,7 +141,7 @@ const run = async () => {
     });
 
     // get  category products
-    app.get("/product/category/:category", async (req, res) => {
+    app.get("/product/category/:category", verifyJWT, async (req, res) => {
       const category = req.params.category;
       const query = { category: category };
       const result = await productList.find(query).toArray();
