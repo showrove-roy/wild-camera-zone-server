@@ -3,7 +3,6 @@ const app = express();
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
-const { query } = require("express");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -22,6 +21,20 @@ const run = async () => {
   try {
     const productList = client.db("wcz-BD").collection("productList");
     const userList = client.db("wcz-BD").collection("userList");
+
+    //  Json access token
+    app.get("/jwt", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await userList.findOne(query);
+      if (user) {
+        const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+          expiresIn: "1h",
+        });
+        return res.send({ accessToken: token });
+      }
+      res.status(403).send({ accessToken: "" });
+    });
 
     // get user role
     app.get("/user/:email", async (req, res) => {
