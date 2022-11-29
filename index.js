@@ -23,6 +23,14 @@ const run = async () => {
     const productList = client.db("wcz-BD").collection("productList");
     const userList = client.db("wcz-BD").collection("userList");
 
+    // get user role
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await userList.findOne(query);
+      res.send({ role: user?.role });
+    });
+
     // add a product
     app.post("/product/add", async (req, res) => {
       const product = req.body;
