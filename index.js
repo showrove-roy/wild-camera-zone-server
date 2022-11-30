@@ -95,6 +95,14 @@ const run = async () => {
       res.send(result);
     });
 
+    // delete any product
+    app.delete("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await productList.deleteOne(filter);
+      res.send(result);
+    });
+
     // get all users
     app.get("/users", verifyJWT, async (req, res) => {
       const userType = req.query.role;
