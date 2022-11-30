@@ -38,6 +38,7 @@ const run = async () => {
     const productList = client.db("wcz-BD").collection("productList");
     const userList = client.db("wcz-BD").collection("userList");
     const bookingList = client.db("wcz-BD").collection("bookingList");
+    const wishList = client.db("wcz-BD").collection("wishList");
 
     //  Json access token
     app.get("/jwt", async (req, res) => {
@@ -186,6 +187,28 @@ const run = async () => {
       const query = { buyerEmail: email };
       const myBooking = await bookingList.find(query).toArray();
       res.send(myBooking);
+    });
+
+    // post all wish list
+    app.post("/wishlist", async (req, res) => {
+      const wish = req.body;
+      const email = req.query.email;
+      const pID = req.query.pid;
+      const query = { buyerEmail: email, productId: pID };
+      const alreadywish = await wishList.find(query).toArray();
+      if (alreadywish?.length > 0) {
+        return res.send({ message: "wished" });
+      }
+      const result = await wishList.insertOne(wish);
+      res.send(result);
+    });
+
+    // get all wish list
+    app.get("/wishlist", async (req, res) => {
+      const email = req.query.email;
+      const query = { buyerEmail: email };
+      const myWishList = await wishList.find(query).toArray();
+      res.send(myWishList);
     });
 
     //
