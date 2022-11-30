@@ -37,6 +37,7 @@ const run = async () => {
   try {
     const productList = client.db("wcz-BD").collection("productList");
     const userList = client.db("wcz-BD").collection("userList");
+    const bookingList = client.db("wcz-BD").collection("bookingList");
 
     //  Json access token
     app.get("/jwt", async (req, res) => {
@@ -162,6 +163,20 @@ const run = async () => {
 
       const result = await productList.updateOne(filter, updateDoc, options);
 
+      res.send(result);
+    });
+
+    // post book on booking list
+    app.post("/booking", async (req, res) => {
+      const book = req.body;
+      const email = req.query.email;
+      const pID = req.query.pid;
+      const query = { buyerEmail: email, productId: pID };
+      const alreadyBook = await bookingList.find(query).toArray();
+      if (alreadyBook?.length > 0) {
+        return res.send({ message: "booked" });
+      }
+      const result = await bookingList.insertOne(book);
       res.send(result);
     });
 
