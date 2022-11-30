@@ -173,10 +173,13 @@ const run = async () => {
       const email = req.query.email;
       const pID = req.query.pid;
       const query = { buyerEmail: email, productId: pID };
+      const query2 = { buyerEmail: email, _id: pID };
       const alreadyBook = await bookingList.find(query).toArray();
       if (alreadyBook?.length > 0) {
+        await wishList.deleteOne(query2);
         return res.send({ message: "booked" });
       }
+      await wishList.deleteOne(query2);
       const result = await bookingList.insertOne(book);
       res.send(result);
     });
@@ -194,7 +197,12 @@ const run = async () => {
       const wish = req.body;
       const email = req.query.email;
       const pID = req.query.pid;
-      const query = { buyerEmail: email, productId: pID };
+      const query = { buyerEmail: email, _id: pID };
+      const query2 = { buyerEmail: email, productId: pID };
+      const alreadyBook = await bookingList.find(query2).toArray();
+      if (alreadyBook?.length > 0) {
+        return res.send({ message: "booked" });
+      }
       const alreadywish = await wishList.find(query).toArray();
       if (alreadywish?.length > 0) {
         return res.send({ message: "wished" });
