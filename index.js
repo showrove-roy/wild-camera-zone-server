@@ -103,6 +103,14 @@ const run = async () => {
       res.send(result);
     });
 
+    // delete user
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await userList.deleteOne(filter);
+      res.send(result);
+    });
+
     //verify seller
     app.put("/users/:email", async (req, res) => {
       const email = req.params.email;
