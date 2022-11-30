@@ -82,7 +82,7 @@ const run = async () => {
         return res.send(result);
       }
       const result = await productList
-        .find({})
+        .find({ product_statues: "unsold" })
         .sort({ upload_time: -1 })
         .toArray();
       res.send(result);
@@ -90,8 +90,38 @@ const run = async () => {
 
     // get only ad product
     app.get("/product/ad", async (req, res) => {
-      const query = { ad_status: "ad" };
+      const query = { ad_status: "ad", product_statues: "unsold" };
       const result = await productList.find(query).toArray();
+      res.send(result);
+    });
+
+    // get single product
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await productList.findOne(filter);
+      res.send(result);
+    });
+
+    app.put("/payment/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const filter2 = { productId: id };
+      const filter3 = { product_Id: id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          product_statues: "sold",
+        },
+      };
+      const updateDoc2 = {
+        $set: {
+          productStatues: "sold",
+        },
+      };
+      await bookingList.updateMany(filter2, updateDoc2, options);
+      await wishList.updateMany(filter3, updateDoc, options);
+      const result = await productList.updateOne(filter, updateDoc, options);
       res.send(result);
     });
 
@@ -99,6 +129,10 @@ const run = async () => {
     app.delete("/product/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
+      const query = { productId: id };
+      const query2 = { product_Id: id };
+      await bookingList.deleteMany(query);
+      await wishList.deleteMany(query2);
       const result = await productList.deleteOne(filter);
       res.send(result);
     });
@@ -161,7 +195,7 @@ const run = async () => {
     // get  category products
     app.get("/product/category/:category", async (req, res) => {
       const category = req.params.category;
-      const query = { category: category };
+      const query = { category: category, product_statues: "unsold" };
       const result = await productList.find(query).toArray();
       res.send(result);
     });
