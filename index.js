@@ -143,7 +143,7 @@ const run = async () => {
     });
 
     // get  category products
-    app.get("/product/category/:category", verifyJWT, async (req, res) => {
+    app.get("/product/category/:category", async (req, res) => {
       const category = req.params.category;
       const query = { category: category };
       const result = await productList.find(query).toArray();
@@ -173,7 +173,8 @@ const run = async () => {
       const email = req.query.email;
       const pID = req.query.pid;
       const query = { buyerEmail: email, productId: pID };
-      const query2 = { buyerEmail: email, _id: pID };
+      const query2 = { buyerEmail: email, product_Id: pID };
+      console.log(email, pID);
       const alreadyBook = await bookingList.find(query).toArray();
       if (alreadyBook?.length > 0) {
         await wishList.deleteOne(query2);
@@ -192,12 +193,20 @@ const run = async () => {
       res.send(myBooking);
     });
 
-    // post all wish list
+    // delete any order
+    app.delete("/booking/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await bookingList.deleteOne(query);
+      res.send(result);
+    });
+
+    // post wish list
     app.post("/wishlist", async (req, res) => {
       const wish = req.body;
       const email = req.query.email;
       const pID = req.query.pid;
-      const query = { buyerEmail: email, _id: pID };
+      const query = { buyerEmail: email, product_Id: pID };
       const query2 = { buyerEmail: email, productId: pID };
       const alreadyBook = await bookingList.find(query2).toArray();
       if (alreadyBook?.length > 0) {
@@ -217,6 +226,14 @@ const run = async () => {
       const query = { buyerEmail: email };
       const myWishList = await wishList.find(query).toArray();
       res.send(myWishList);
+    });
+
+    // delete any wish
+    app.delete("/wishlist/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await wishList.deleteOne(query);
+      res.send(result);
     });
 
     //
