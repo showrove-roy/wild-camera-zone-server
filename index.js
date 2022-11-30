@@ -190,7 +190,6 @@ const run = async () => {
       const pID = req.query.pid;
       const query = { buyerEmail: email, productId: pID };
       const query2 = { buyerEmail: email, product_Id: pID };
-      console.log(email, pID);
       const alreadyBook = await bookingList.find(query).toArray();
       if (alreadyBook?.length > 0) {
         await wishList.deleteOne(query2);
