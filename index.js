@@ -180,6 +180,14 @@ const run = async () => {
       res.send(result);
     });
 
+    // get all order by email
+    app.get("/booking", async (req, res) => {
+      const email = req.query.email;
+      const query = { buyerEmail: email };
+      const myBooking = await bookingList.find(query).toArray();
+      res.send(myBooking);
+    });
+
     //
   } finally {
   }
