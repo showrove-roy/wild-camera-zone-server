@@ -105,22 +105,42 @@ const run = async () => {
 
     app.put("/payment/:id", async (req, res) => {
       const id = req.params.id;
+      const email = req.query.email;
+      const query = { productId: id, buyerEmail: email };
       const filter = { _id: ObjectId(id) };
       const filter2 = { productId: id };
       const filter3 = { product_Id: id };
       const options = { upsert: true };
+
+      const userInfo = await bookingList.findOne(query);
+
+      const buyerDetails = {
+        buyerName: userInfo?.buyerName,
+        buyerPhone: userInfo?.buyerPhone,
+        buyerEmail: userInfo?.buyerEmail,
+      };
       const updateDoc = {
+        $set: {
+          product_statues: "sold",
+          buyerDetails,
+        },
+      };
+
+      const updateDoc2 = {
+        $set: {
+          productStatues: "sold",
+          paidBy: email,
+        },
+      };
+      const updateDoc3 = {
         $set: {
           product_statues: "sold",
         },
       };
-      const updateDoc2 = {
-        $set: {
-          productStatues: "sold",
-        },
-      };
+
       await bookingList.updateMany(filter2, updateDoc2, options);
-      await wishList.updateMany(filter3, updateDoc, options);
+      await wishList.updateMany(filter3, updateDoc3, options);
+
       const result = await productList.updateOne(filter, updateDoc, options);
       res.send(result);
     });
