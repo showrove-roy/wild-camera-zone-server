@@ -305,6 +305,15 @@ const run = async () => {
       res.send(result);
     });
 
+    // get seller's buyers
+    app.get("/mybuyers/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { seller_email: email, product_statues: "sold" };
+      const result = await productList.find(query).toArray();
+      const buyer = result.map((product) => product.buyerDetails);
+      res.send(buyer);
+    });
+
     //
   } finally {
   }
