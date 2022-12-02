@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 // middle ware
 app.use(cors());
 app.use(express.json());
@@ -39,6 +41,7 @@ const run = async () => {
     const userList = client.db("wcz-BD").collection("userList");
     const bookingList = client.db("wcz-BD").collection("bookingList");
     const wishList = client.db("wcz-BD").collection("wishList");
+    const paymentList = client.db("wcz-BD").collection("paymentList");
 
     //  Json access token
     app.get("/jwt", async (req, res) => {
@@ -312,6 +315,28 @@ const run = async () => {
       const result = await productList.find(query).toArray();
       const buyer = result.map((product) => product.buyerDetails);
       res.send(buyer);
+    });
+
+    // Stripe payment system
+    app.post("/create-payment-intent", async (req, res) => {
+      const { resell_price } = req.body;
+      const price = resell_price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: price,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
+    // storaed buyer info on
+    app.post("/payment", async (req, res) => {
+      const info = req.body;
+      const result = await paymentList.insertOne(info);
+      res.send(result);
     });
 
     //
